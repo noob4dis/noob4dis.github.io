@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video with Mascot and Skip Button</title>
+  <style>
+    html, body {
+        overflow: hidden; /* Disable scrolling */
+        height: 100%;     /* Full height for viewport */
+        margin: 0;        /* Remove default margin */
+        padding: 0;       /* Remove default padding */
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: url(classroom.jpg) no-repeat center center fixed;
+        background-size: cover;
+    }
+    
+    h1 {
+      position: absolute; /* Position the title at the top */
+      top: 20px;          /* Space from the top of the viewport */
+      left: 50%;          /* Center horizontally */
+      transform: translateX(-50%); /* Adjust to center exactly */
+      color: white;       /* White color for the title */
+      font-size: 36px;    /* Adjust font size as needed */
+      text-align: center; /* Center align text */
+      z-index: 10000;     /* Make sure it appears above all other elements */
+    }
+
+    /* Dark overlay to reduce brightness of background */
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5); /* Semi-transparent dark overlay */
+        z-index: -1; /* Place it behind the content */
+    }
+
+    .container {
+        position: relative;
+        width: 90%;
+        max-width: 1200px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* Space out the video and side elements */
+        gap: 20px;
+    }
+
+    .video-container {
+        width: 85%; /* Increased width for video */
+        position: relative;
+        aspect-ratio: 16 / 9; /* Maintain 16:9 aspect ratio */
+    }
+
+    .video-container iframe {
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional shadow */
+    }
+
+    .side-elements {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px; /* Increased gap */
+        width: 25%; /* Reduced width to make side elements bigger */
+        max-width: 350px; /* Optional: cap the max width for smaller screens */
+    }
+
+    .mascot-container img {
+        width: 200px; /* Increased mascot size */
+        height: auto;
+        border-radius: 10px;
+    }
+
+    .skip-button {
+        padding: 20px 40px; /* Increased padding for button */
+        font-size: 24px; /* Larger font size */
+        color: white;
+        background-color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        width: 100%; /* Make button full width on smaller screens */
+    }
+
+    .skip-button:hover {
+        background-color: pink;
+    }
+
+    .speech-bubble {
+        position: relative;
+        background: white;
+        color: black;
+        border: 2px solid pink;
+        border-radius: 10px;
+        padding: 10px 15px; /* Increased padding */
+        font-size: 15px; /* Increased font size */
+        max-width: 225px; /* Increased max-width */
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Responsive Layout Adjustments */
+    @media (max-width: 768px) {
+        .container {
+            flex-direction: column;
+            align-items: center;
+        }
+        .video-container {
+            width: 100%; /* Video takes full width on smaller screens */
+            margin-bottom: 20px; /* Add space below the video */
+        }
+        .side-elements {
+            width: 100%;
+            max-width: none; /* Remove the max-width limitation */
+        }
+        .skip-button {
+            width: auto; /* Button takes auto width on mobile */
+            padding: 15px 25spx;
+        }
+    }
+
+  </style>
+</head>
+<body>
+  <h1>What is Generative AI?</h1>
+  <div class="container">
+    <div class="video-container">
+      <!-- Replace this URL with your YouTube video embed link -->
+      <iframe src="https://www.youtube.com/embed/rwF-X5STYks?si=N9ypz88IlUUNewK1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="side-elements">
+      <div class="mascot-container">
+        <div class="speech-bubble">
+          Hey! Watch this video on Generative AI. It’s exciting and informative!
+        </div>
+        <!-- Replace with the image of your mascot -->
+        <img src="mascot-export.gif" alt="Mascot">
+      </div>
+      <button class="skip-button" onclick="skipToLesson()">Skip to Lesson</button>
+    </div>
+  </div>
+
+  <script>
+    function skipToLesson() {
+      const lessonURL = 'AI-lesson.html';
+      window.location.href = lessonURL;
+    }
+  </script>
+
+</body>
+</html>

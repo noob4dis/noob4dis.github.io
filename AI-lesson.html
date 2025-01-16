@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Card Game</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #35654d;
+        background-size: cover;
+        z-index: 0;
+    }
+
+    .game-container {
+      text-align: center;
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      height: 100%;
+      z-index: 10;
+    }
+
+    h1 {
+      margin: 10px;
+      position: relative;
+      z-index: 2;
+      color: bisque;
+    }
+
+    .card-grid {
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      height: 60%;
+      margin: auto;
+    }
+
+    .card {
+      width: 120px;
+      height: 150px;
+      perspective: 1000px;
+      position: absolute;
+      transition: transform 0.5s ease, top 0.5s ease, left 0.5s ease;
+      cursor: pointer;
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+    }
+
+    .card-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card-front {
+      background-color: pink;
+      color: black;
+    }
+
+    .card-back {
+      background-color: white;
+      color: black;
+      transform: rotateY(180deg);;
+    }
+    .card-front,.card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 10px; /* Apply border-radius here */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid black; /* Apply border here */
+    }
+
+    /* Speech Bubble and Mascot */
+    .mascot-container {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        z-index: 100;
+    }
+
+    .mascot {
+        width: 150px;
+        cursor: pointer;
+        z-index: 999;
+    }
+
+    .speech-bubble {
+        position: fixed;
+        bottom: 100px;
+        right: 100px;
+        background-color: white;
+        border: 2px solid pink;
+        border-radius: 15px;
+        padding: 10px;
+        max-width: 250px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        font-size: 14px;
+        z-index: 1000;
+    }
+
+    .speech-bubble p {
+      margin: 0;
+    }
+
+    .speech-bubble button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      background-color: black;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .speech-bubble button:hover {
+      background-color: pink;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>AI Card Facts</h1>
+    <div class="card-grid" id="card-grid"></div>
+    <div class="mascot-container">
+      <img src="LessonCat.gif" alt="Mascot" class="mascot" id="mascot">
+      <div class="speech-bubble" id="speech-bubble">
+        <p>Welcome fellow AI-er, Flip all the cards to learn interesting AI facts.</p>
+      </div>
+      <div class="speech-bubble" id="quiz-bubble" style="display: none;">
+        <p>All cards flipped! Ready to test your knowledge?</p>
+        <a href="QuizAI.html">
+          <button>Go to Quiz</button>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const facts = [
+        "Generative AI can create images, text, and even music.",
+        "ChatGPT is a type of Generative AI model developed by OpenAI.",
+        "Generative AI learns from vast amounts of data to generate new content.",
+        "It uses neural networks to mimic human-like creativity.",
+        "Deepfakes are AI-generated or edited images, videos, or audio that can depict real or non-existent people.",
+        "AI art tools like DALL-E create stunning images from text prompts.",
+        "Generative AI is transforming industries like healthcare and marketing.",
+        "Large Language Models (LLMs) power many Generative AI systems.",
+        "Ethical use of Generative AI includes avoiding bias and ensuring privacy.",
+        "Generative AI doesn't 'understand' content like humans but identifies patterns.",
+      ];
+
+      const cardGrid = document.getElementById('card-grid');
+      const speechBubble = document.getElementById('speech-bubble');
+      const quizBubble = document.getElementById('quiz-bubble');
+      let flippedCards = 0;
+
+      const cardPositions = [];
+      function generateCards() {
+        cardGrid.innerHTML = '';
+        facts.forEach((fact, index) => {
+          const card = document.createElement('div');
+          card.classList.add('card');
+          card.dataset.index = index;
+          card.style.top = '50%';
+          card.style.left = '50%';
+          card.innerHTML = `
+            <div class="card-inner">
+              <div class="card-front">Fact ${index + 1}</div>
+              <div class="card-back">${fact}</div>
+            </div>
+          `;
+          card.addEventListener('click', () => {
+            const inner = card.querySelector('.card-inner');
+            inner.classList.toggle('is-flipped'); // Toggle the flipped state
+            
+            if (inner.classList.contains('is-flipped')) {
+              flippedCards++;
+              if (flippedCards === facts.length) {
+                speechBubble.style.display = 'none';
+                quizBubble.style.display = 'block';
+              }
+            } else {
+              flippedCards--; // Decrement if card is flipped back
+            }
+          });
+          cardGrid.appendChild(card);
+          cardPositions.push({ top: `${Math.floor(index / 4) * 160}px`, left: `${(index % 4) * 140}px` });
+        });
+
+        setTimeout(() => {
+          const cards = document.querySelectorAll('.card');
+          cards.forEach((card, index) => {
+            card.style.top = cardPositions[index].top;
+            card.style.left = cardPositions[index].left;
+          });
+        }, 500);
+      }
+
+      generateCards();
+    });
+  </script>
+</body>
+</html>
