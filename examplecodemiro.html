@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generative AI Card Flip Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .game-container {
+      text-align: center;
+      margin: 20px;
+      width: 100%;
+      max-width: 960px;
+      height: 90%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 10; /* Ensure title stays above other content */
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      z-index: 1; /* Cards layer behind buttons */
+    }
+
+    .card {
+      width: 120px;
+      height: 150px;
+      perspective: 1000px;
+      transition: transform 0.6s, top 0.6s, left 0.6s;
+      pointer-events: auto;
+      cursor: pointer;
+      transform: scale(0.9);
+      position: relative; /* Ensure cards don’t overlap each other */
+    }
+
+    .card:hover {
+      transform: scale(1.1);
+      z-index: 2; /* Bring hovered card to the front */
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .card-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-front,
+    .card-back {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      backface-visibility: hidden;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .card-front {
+      background: url('card-front.jpg') center/cover no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
+      color: white;
+      font-weight: bold;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+    }
+
+    .card-back {
+      background: url('AI-Card-back.jpg') center/cover no-repeat;
+      color: #333;
+      text-align: center;
+      padding: 10px;
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 14px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-back a {
+      margin-top: 10px;
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+    }
+
+    .card-back a:hover {
+      text-decoration: underline;
+    }
+
+    .quiz-button, .reshuffle-button {
+      margin-top: 30px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      z-index: 10; /* Ensure buttons stay on top */
+    }
+
+    .quiz-button:hover, .reshuffle-button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Pop-up modal */
+    .modal {
+      display: none; 
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 100; /* Ensure modal stays on top */
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 20px;
+    }
+
+    /* Media queries for responsive design */
+    @media (max-width: 768px) {
+      .card-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .card-front,
+      .card-back {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        height: 100px;
+      }
+
+      .card-front,
+      .card-back {
+        font-size: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Generative AI Card Flip Game</h1>
+    
+    <!-- Pop-up Modal for "Start Shuffling" -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <p>Shuffling the deck...</p>
+      </div>
+    </div>
+
+    <div class="card-grid" id="card-grid"></div>
+
+    <button class="reshuffle-button" onclick="reshuffleCards()">Reshuffle Cards</button>
+    <button class="quiz-button" id="quiz-button" style="display: none;" onclick="startQuiz()">Start the Quiz</button>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const facts = [
+        "Generative AI can create images, text, and even music.",
+        "ChatGPT is a type of Generative AI model developed by OpenAI.",
+        "Generative AI learns from vast amounts of data to generate new content.",
+        "It uses neural networks to mimic human-like creativity.",
+        "Deepfakes are an example of Generative AI in action.",
+        "AI art tools like DALL-E create stunning images from text prompts.",
+        "Generative AI is transforming industries like healthcare and marketing.",
+        "Large Language Models (LLMs) power many Generative AI systems.",
+        "Ethical use of Generative AI includes avoiding bias and ensuring privacy.",
+        "Generative AI doesn't 'understand' content like humans but identifies patterns.",
+      ];
+
+      const cardGrid = document.querySelector('.card-grid');
+      const quizButton = document.getElementById('quiz-button');
+      const reshuffleButton = document.querySelector('.reshuffle-button');
+      const modal = document.getElementById('modal');
+      let flippedCards = 0;
+
+      let shuffledFacts = facts.sort(() => 0.5 - Math.random());
+
+      function generateCards() {
+        cardGrid.innerHTML = '';
+        cardGrid.style.opacity = 0;
+
+        shuffledFacts.forEach((fact, index) => {
+          const card = document.createElement('div');
+          card.classList.add('card');
+          card.style.top = `${Math.random() * 50}px`;
+          card.style.left = `${Math.random() * 50}px`;
+          card.innerHTML = `
+            <div class="card-inner">
+              <div class="card-front">AI Fact ${index + 1}</div>
+              <div class="card-back">
+                <p>${fact}</p>
+                <a href="https://example.com" target="_blank">Learn More</a>
+              </div>
+            </div>
+          `;
+          cardGrid.appendChild(card);
+
+          card.addEventListener('click', () => {
+            if (!card.classList.contains('is-flipped')) {
+              flippedCards++;
+              if (flippedCards === shuffledFacts.length) {
+                quizButton.style.display = 'inline-block';
+              }
+            }
+            card.querySelector('.card-inner').classList.toggle('is-flipped');
+          });
+        });
+
+        setTimeout(() => {
+          cardGrid.style.opacity = 1;
+        }, 600);
+      }
+
+      // Display the "Shuffling" modal for 3 seconds and then start the game
+      setTimeout(() => {
+        modal.style.display = "flex"; // Show the modal
+        setTimeout(() => {
+          modal.style.display = "none"; // Hide the modal after 3 seconds
+          generateCards(); // Start generating the cards after the modal disappears
+        }, 3000); // 3 seconds
+      }, 500);
+
+      // Function to reshuffle cards
+      window.reshuffleCards = function() {
+        flippedCards = 0;
+        quizButton.style.display = 'none';
+        shuffledFacts = facts.sort(() => 0.5 - Math.random());
+        generateCards();
+        modal.style.display = "flex"; // Show modal for reshuffling
+        setTimeout(() => {
+          modal.style.display = "none"; // Hide after 3 seconds
+        }, 3000);
+      }
+
+      // Start Quiz Function
+      function startQuiz() {
+        alert("Redirecting to the quiz!");
+        window.location.href = "quiz.html"; // Update to your quiz URL
+      }
+    });
+  </script>
+</body>
+</html>
